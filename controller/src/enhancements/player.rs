@@ -7,6 +7,9 @@ use anyhow::{
     Context,
     Result,
 };
+use imgui::ImColor32;
+use obfstr::obfstr;
+
 use cs2::{
     BoneFlags,
     CEntityIdentityEx,
@@ -17,15 +20,12 @@ use cs2_schema_declaration::{
     Ptr,
 };
 use cs2_schema_generated::cs2::client::{
+    C_CSPlayerPawn,
     CCSPlayer_ItemServices,
     CModelState,
     CSkeletonInstance,
-    C_CSPlayerPawn,
 };
-use imgui::ImColor32;
-use obfstr::obfstr;
 
-use super::Enhancement;
 use crate::{
     settings::{
         AppSettings,
@@ -42,6 +42,8 @@ use crate::{
     },
     weapon::WeaponId,
 };
+
+use super::Enhancement;
 
 pub struct PlayerInfo {
     pub controller_entity_id: u32,
@@ -283,9 +285,8 @@ impl<'a> PlayerInfoLayout<'a> {
         has_2d_box: bool,
     ) -> Self {
         let target_scale_raw = (vmax.y - vmin.y) / screen_bounds.y * 8.0;
-        let target_scale = target_scale_raw.clamp(0.5, 1.25);
+        let target_scale = target_scale_raw.clamp(0.85, 1.05);
         ui.set_window_font_scale(target_scale);
-
         Self {
             ui,
             draw,
@@ -313,7 +314,7 @@ impl<'a> PlayerInfoLayout<'a> {
             pos.x -= text_width / 2.0;
             pos
         };
-        pos.y += self.line_count as f32 * self.font_scale * (self.ui.text_line_height())
+        pos.y += 1.0 + self.line_count as f32 * self.font_scale * (self.ui.text_line_height())
             + 4.0 * self.line_count as f32;
 
         self.draw.add_text([pos.x, pos.y], color, text);
@@ -329,6 +330,7 @@ impl Drop for PlayerInfoLayout<'_> {
 
 const HEALTH_BAR_MAX_HEALTH: f32 = 100.0;
 const HEALTH_BAR_BORDER_WIDTH: f32 = 1.0;
+
 impl Enhancement for PlayerESP {
     fn update(&mut self, ctx: &crate::UpdateContext) -> anyhow::Result<()> {
         if self
@@ -483,8 +485,8 @@ impl Enhancement for PlayerESP {
                             .skeleton_color
                             .calculate_color(player_rel_health, distance),
                     )
-                    .thickness(esp_settings.skeleton_width)
-                    .build();
+                        .thickness(esp_settings.skeleton_width)
+                        .build();
                 }
             }
 
@@ -498,8 +500,8 @@ impl Enhancement for PlayerESP {
                                 .box_color
                                 .calculate_color(player_rel_health, distance),
                         )
-                        .thickness(esp_settings.box_width)
-                        .build();
+                            .thickness(esp_settings.box_width)
+                            .build();
                     }
                 }
                 EspBoxType::Box3D => {
@@ -574,9 +576,9 @@ impl Enhancement for PlayerESP {
                         ],
                         [0.0, 0.0, 0.0, 1.0],
                     )
-                    .filled(false)
-                    .thickness(BORDER_WIDTH)
-                    .build();
+                        .filled(false)
+                        .thickness(BORDER_WIDTH)
+                        .build();
 
                     box_x += BORDER_WIDTH / 2.0 + 1.0;
                     box_y += BORDER_WIDTH / 2.0 + 1.0;
@@ -592,16 +594,16 @@ impl Enhancement for PlayerESP {
                             [box_x + box_width, yoffset],
                             [1.0, 0.0, 0.0, 1.0],
                         )
-                        .filled(true)
-                        .build();
+                            .filled(true)
+                            .build();
 
                         draw.add_rect(
                             [box_x, yoffset],
                             [box_x + box_width, box_y + box_height],
                             [0.0, 1.0, 0.0, 1.0],
                         )
-                        .filled(true)
-                        .build();
+                            .filled(true)
+                            .build();
                     } else {
                         /* horizontal */
                         let xoffset = box_x + (1.0 - player_rel_health) * box_width;
@@ -610,16 +612,16 @@ impl Enhancement for PlayerESP {
                             [xoffset, box_y + box_height],
                             [1.0, 0.0, 0.0, 1.0],
                         )
-                        .filled(true)
-                        .build();
+                            .filled(true)
+                            .build();
 
                         draw.add_rect(
                             [xoffset, box_y],
                             [box_x + box_width, box_y + box_height],
                             [0.0, 1.0, 0.0, 1.0],
                         )
-                        .filled(true)
-                        .build();
+                            .filled(true)
+                            .build();
                     }
                 }
             }
@@ -717,8 +719,8 @@ impl Enhancement for PlayerESP {
                             .tracer_lines_color
                             .calculate_color(player_rel_health, distance),
                     )
-                    .thickness(esp_settings.tracer_lines_width)
-                    .build();
+                        .thickness(esp_settings.tracer_lines_width)
+                        .build();
                 }
             }
         }
